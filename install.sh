@@ -275,7 +275,7 @@ ccc() {
     echo "  ccc glm --dangerously-skip-permissions    # Launch GLM with options"
     echo ""
     echo "Available models:"
-    echo "  Official: deepseek, glm, kimi, qwen, seed|doubao, claude, minimax"
+    echo "  Official: deepseek, glm, kimi, qwen, byteplus, xiaomi, seed|doubao, claude, minimax"
     echo "  OpenRouter: open <provider>"
     echo "  Account:  <account> | claude:<account>"
     return 1
@@ -303,7 +303,7 @@ ccc() {
   # Helper: known model keyword
   _is_known_model() {
     case "\$1" in
-      deepseek|ds|glm|glm5|kimi|kimi2|qwen|minimax|mm|seed|doubao|claude|sonnet|s|open)
+      deepseek|ds|glm|glm5|kimi|kimi2|qwen|minimax|mm|byteplus|xiaomi|seed|doubao|claude|sonnet|s|open)
         return 0 ;;
       *)
         return 1 ;;
@@ -529,7 +529,7 @@ Examples:
   ccc claude:work                  # Switch to 'work' account and use Claude
 
 Available models:
-  Official: deepseek, glm, kimi, qwen, seed|doubao, claude, minimax
+  Official: deepseek, glm, kimi, qwen, byteplus, xiaomi, seed|doubao, claude, minimax
   OpenRouter: open <provider>
   Account:  <account> | claude:<account>
 EOF2
@@ -567,7 +567,7 @@ fi
 
 is_known_model() {
     case "$1" in
-        deepseek|ds|glm|glm5|kimi|kimi2|qwen|minimax|mm|seed|doubao|claude|sonnet|s|open)
+        deepseek|ds|glm|glm5|kimi|kimi2|qwen|minimax|mm|byteplus|xiaomi|seed|doubao|claude|sonnet|s|open)
             return 0 ;;
         *)
             return 1 ;;
@@ -651,7 +651,7 @@ Examples:
   ccc claude:work                  # Switch to 'work' account and use Claude
 
 Available models:
-  Official: deepseek, glm, kimi, qwen, seed|doubao, claude, minimax
+  Official: deepseek, glm, kimi, qwen, byteplus, xiaomi, seed|doubao, claude, minimax
   OpenRouter: open <provider>
   Account:  <account> | claude:<account>
 EOF2
@@ -689,7 +689,7 @@ fi
 
 is_known_model() {
     case "$1" in
-        deepseek|ds|glm|glm5|kimi|kimi2|qwen|minimax|mm|seed|doubao|claude|sonnet|s|open)
+        deepseek|ds|glm|glm5|kimi|kimi2|qwen|minimax|mm|byteplus|xiaomi|seed|doubao|claude|sonnet|s|open)
             return 0 ;;
         *)
             return 1 ;;
@@ -893,10 +893,15 @@ main() {
   if $ENABLE_RC && [[ "$MODE" != "project" ]]; then
     local rc_files
     rc_files=( $(detect_rc_files) )
-    local rc_target="${rc_files[0]:-$HOME/.zshrc}"
-    remove_existing_block "$rc_target"
-    append_function_block "$rc_target" "$data_dir/ccm.sh"
-    log_info "$(t "Injected ccm/ccc functions into:" "已写入 ccm/ccc 函数到：") $rc_target"
+    if [[ ${#rc_files[@]} -eq 0 ]]; then
+      rc_files=("$HOME/.zshrc")
+    fi
+    local rc_target
+    for rc_target in "${rc_files[@]}"; do
+      remove_existing_block "$rc_target"
+      append_function_block "$rc_target" "$data_dir/ccm.sh"
+      log_info "$(t "Injected ccm/ccc functions into:" "已写入 ccm/ccc 函数到：") $rc_target"
+    done
   fi
 
   if [[ "$MODE" == "project" ]]; then
