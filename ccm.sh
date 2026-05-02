@@ -161,11 +161,17 @@ MINIMAX_API_KEY=your-minimax-api-key
 # 豆包 Seed-Code (字节跳动)
 ARK_API_KEY=your-ark-api-key
 
+# BytePlus ModelArk
+BYTEPLUS_API_KEY=your-byteplus-api-key
+
 # StepFun
 STEPFUN_API_KEY=your-stepfun-api-key
 
 # Qwen（阿里云 DashScope）
 QWEN_API_KEY=your-qwen-api-key
+
+# Xiaomi MiMo
+XIAOMI_API_KEY=your-xiaomi-api-key
 
 # Claude (如果使用API key而非Pro订阅)
 CLAUDE_API_KEY=your-claude-api-key
@@ -184,6 +190,8 @@ OPUS_MODEL=claude-opus-4-6
 HAIKU_MODEL=claude-haiku-4-5-20251001
 MINIMAX_MODEL=MiniMax-M2.5
 SEED_MODEL=ark-code-latest
+BYTEPLUS_MODEL=ark-code-latest
+XIAOMI_MODEL=mimo-v2.5-pro
 STEPFUN_MODEL=step-3.5-flash
 
 EOF
@@ -271,11 +279,17 @@ MINIMAX_API_KEY=your-minimax-api-key
 # 豆包 Seed-Code (字节跳动)
 ARK_API_KEY=your-ark-api-key
 
+# BytePlus ModelArk
+BYTEPLUS_API_KEY=your-byteplus-api-key
+
 # StepFun
 STEPFUN_API_KEY=your-stepfun-api-key
 
 # Qwen（阿里云 DashScope）
 QWEN_API_KEY=your-qwen-api-key
+
+# Xiaomi MiMo
+XIAOMI_API_KEY=your-xiaomi-api-key
 
 # Claude (如果使用API key而非Pro订阅)
 CLAUDE_API_KEY=your-claude-api-key
@@ -294,6 +308,8 @@ OPUS_MODEL=claude-opus-4-6
 HAIKU_MODEL=claude-haiku-4-5-20251001
 MINIMAX_MODEL=MiniMax-M2.5
 SEED_MODEL=ark-code-latest
+BYTEPLUS_MODEL=ark-code-latest
+XIAOMI_MODEL=mimo-v2.5-pro
 STEPFUN_MODEL=step-3.5-flash
 
 EOF
@@ -643,6 +659,24 @@ get_provider_config() {
                 "global") config_base_url="https://api.minimax.io/anthropic" ;;
                 "china") config_base_url="https://api.minimaxi.com/anthropic" ;;
             esac
+            ;;
+        "byteplus")
+            if ! is_effectively_set "$BYTEPLUS_API_KEY"; then
+                echo -e "${RED}❌ Please configure BYTEPLUS_API_KEY first${NC}" >&2
+                return 1
+            fi
+            config_token_var="BYTEPLUS_API_KEY"
+            config_model="${BYTEPLUS_MODEL:-ark-code-latest}"
+            config_base_url="https://ark.ap-southeast.bytepluses.com/api/coding"
+            ;;
+        "xiaomi")
+            if ! is_effectively_set "$XIAOMI_API_KEY"; then
+                echo -e "${RED}❌ Please configure XIAOMI_API_KEY first${NC}" >&2
+                return 1
+            fi
+            config_token_var="XIAOMI_API_KEY"
+            config_model="${XIAOMI_MODEL:-mimo-v2.5-pro}"
+            config_base_url="https://api.xiaomimimo.com/anthropic"
             ;;
         "seed"|"doubao")
             if ! is_effectively_set "$ARK_API_KEY"; then
@@ -2208,6 +2242,34 @@ emit_env_exports() {
             emit_default_models "$mm_model" "$mm_model" "$mm_model"
             emit_subagent_model "$mm_model"
             ;;
+        "byteplus")
+            if ! is_effectively_set "$BYTEPLUS_API_KEY"; then
+                echo -e "${RED}❌ Please configure BYTEPLUS_API_KEY${NC}" >&2
+                return 1
+            fi
+            local byteplus_model="${BYTEPLUS_MODEL:-ark-code-latest}"
+            echo "$prelude"
+            echo "export ANTHROPIC_BASE_URL='https://ark.ap-southeast.bytepluses.com/api/coding'"
+            echo "if [ -f \"\$HOME/.ccm_config\" ]; then . \"\$HOME/.ccm_config\" >/dev/null 2>&1; fi"
+            echo "export ANTHROPIC_AUTH_TOKEN=\"\${BYTEPLUS_API_KEY}\""
+            echo "export ANTHROPIC_MODEL='${byteplus_model}'"
+            emit_default_models "$byteplus_model" "$byteplus_model" "$byteplus_model"
+            emit_subagent_model "$byteplus_model"
+            ;;
+        "xiaomi")
+            if ! is_effectively_set "$XIAOMI_API_KEY"; then
+                echo -e "${RED}❌ Please configure XIAOMI_API_KEY${NC}" >&2
+                return 1
+            fi
+            local xiaomi_model="${XIAOMI_MODEL:-mimo-v2.5-pro}"
+            echo "$prelude"
+            echo "export ANTHROPIC_BASE_URL='https://api.xiaomimimo.com/anthropic'"
+            echo "if [ -f \"\$HOME/.ccm_config\" ]; then . \"\$HOME/.ccm_config\" >/dev/null 2>&1; fi"
+            echo "export ANTHROPIC_AUTH_TOKEN=\"\${XIAOMI_API_KEY}\""
+            echo "export ANTHROPIC_MODEL='${xiaomi_model}'"
+            emit_default_models "$xiaomi_model" "$xiaomi_model" "$xiaomi_model"
+            emit_subagent_model "$xiaomi_model"
+            ;;
         "seed"|"doubao")
             if ! is_effectively_set "$ARK_API_KEY"; then
                 echo -e "${RED}❌ Please configure ARK_API_KEY${NC}" >&2
@@ -2350,6 +2412,12 @@ main() {
         "minimax"|"mm")
             emit_env_exports minimax "${2:-}"
             ;;
+        "byteplus")
+            emit_env_exports byteplus
+            ;;
+        "xiaomi")
+            emit_env_exports xiaomi
+            ;;
         "seed"|"doubao")
             emit_env_exports seed "${2:-}"
             ;;
@@ -2373,7 +2441,7 @@ main() {
             shift
             local project_action="${1:-}"
             case "$project_action" in
-                "glm"|"deepseek"|"ds"|"kimi"|"kimi2"|"qwen"|"minimax"|"mm"|"seed"|"doubao"|"claude"|"sonnet"|"s")
+                "glm"|"deepseek"|"ds"|"kimi"|"kimi2"|"qwen"|"minimax"|"mm"|"byteplus"|"xiaomi"|"seed"|"doubao"|"claude"|"sonnet"|"s")
                     project_write_settings "$project_action" "${2:-}"
                     ;;
                 "reset")
@@ -2393,7 +2461,7 @@ main() {
             shift
             local user_action="${1:-}"
             case "$user_action" in
-                "glm"|"deepseek"|"ds"|"kimi"|"kimi2"|"qwen"|"minimax"|"mm"|"seed"|"doubao"|"stepfun"|"claude"|"sonnet"|"s")
+                "glm"|"deepseek"|"ds"|"kimi"|"kimi2"|"qwen"|"minimax"|"mm"|"byteplus"|"xiaomi"|"seed"|"doubao"|"stepfun"|"claude"|"sonnet"|"s")
                     user_write_settings "$user_action" "${2:-}"
                     ;;
                 "reset")
