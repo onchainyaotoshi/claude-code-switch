@@ -180,7 +180,7 @@ CLAUDE_API_KEY=your-claude-api-key
 OPENROUTER_API_KEY=your-openrouter-api-key
 
 # —— 可选：模型ID覆盖（不设置则使用下方默认）——
-DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_MODEL=deepseek-v4-pro
 KIMI_MODEL=kimi-k2.5
 KIMI_CN_MODEL=kimi-k2.5
 QWEN_MODEL=qwen3-max-2026-01-23
@@ -298,7 +298,7 @@ CLAUDE_API_KEY=your-claude-api-key
 OPENROUTER_API_KEY=your-openrouter-api-key
 
 # —— 可选：模型ID覆盖（不设置则使用下方默认）——
-DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_MODEL=deepseek-v4-pro
 KIMI_MODEL=kimi-k2.5
 KIMI_CN_MODEL=kimi-k2.5
 QWEN_MODEL=qwen3-max-2026-01-23
@@ -616,7 +616,7 @@ get_provider_config() {
                 return 1
             fi
             config_token_var="DEEPSEEK_API_KEY"
-            config_model="${DEEPSEEK_MODEL:-deepseek-chat}"
+            config_model="${DEEPSEEK_MODEL:-deepseek-v4-pro}"
             config_base_url="https://api.deepseek.com/anthropic"
             ;;
         "kimi"|"kimi2")
@@ -1547,10 +1547,10 @@ switch_to_deepseek() {
         # 官方 Deepseek 的 Anthropic 兼容端点
         export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"
         export ANTHROPIC_AUTH_TOKEN="$DEEPSEEK_API_KEY"
-        export ANTHROPIC_MODEL="${DEEPSEEK_MODEL:-deepseek-chat}"
-        export ANTHROPIC_DEFAULT_SONNET_MODEL="${SONNET_MODEL:-${DEEPSEEK_MODEL:-deepseek-chat}}"
-        export ANTHROPIC_DEFAULT_OPUS_MODEL="${OPUS_MODEL:-${DEEPSEEK_MODEL:-deepseek-chat}}"
-        export ANTHROPIC_DEFAULT_HAIKU_MODEL="${HAIKU_MODEL:-${DEEPSEEK_MODEL:-deepseek-chat}}"
+        export ANTHROPIC_MODEL="${DEEPSEEK_MODEL:-deepseek-v4-pro}"
+        export ANTHROPIC_DEFAULT_SONNET_MODEL="${SONNET_MODEL:-${DEEPSEEK_MODEL:-deepseek-v4-pro}}"
+        export ANTHROPIC_DEFAULT_OPUS_MODEL="${OPUS_MODEL:-${DEEPSEEK_MODEL:-deepseek-v4-pro}}"
+        export ANTHROPIC_DEFAULT_HAIKU_MODEL="${HAIKU_MODEL:-${DEEPSEEK_MODEL:-deepseek-v4-pro}}"
         export CLAUDE_CODE_SUBAGENT_MODEL="${SUBAGENT_MODEL:-$ANTHROPIC_MODEL}"
         echo -e "${GREEN}✅ $(t 'switched_to') Deepseek（$(t 'official')）${NC}"
     else
@@ -1849,7 +1849,7 @@ show_help() {
     echo -e "${YELLOW}支持的模型:${NC}"
     echo "  🌙 KIMI Global          - kimi-k2.5 (api.moonshot.ai/anthropic)"
     echo "  🌕 KIMI China           - kimi-k2.5 (api.moonshot.cn/anthropic)"
-    echo "  🤖 Deepseek             - deepseek-chat (api.deepseek.com/anthropic)"
+    echo "  🤖 Deepseek             - deepseek-v4-pro (api.deepseek.com/anthropic)"
     echo "  🌰 豆包 Seed-Code       - ark-code-latest (ark.cn-beijing.volces.com/api/coding)"
     echo "  ⚡ StepFun              - step-3.5-flash (api.stepfun.ai)"
     echo "  🎯 MiniMax              - MiniMax-M2.5 (api.minimax.io / api.minimaxi.com)"
@@ -1861,7 +1861,7 @@ show_help() {
 # 将缺失的模型ID覆盖项追加到配置文件（仅追加缺失项，不覆盖已存在的配置）
 ensure_model_override_defaults() {
     local -a pairs=(
-        "DEEPSEEK_MODEL=deepseek-chat"
+        "DEEPSEEK_MODEL=deepseek-v4-pro"
         "KIMI_MODEL=kimi-k2.5"
         "KIMI_CN_MODEL=kimi-k2.5"
         "MINIMAX_MODEL=MiniMax-M2.5"
@@ -2034,8 +2034,8 @@ emit_openrouter_exports() {
             default_haiku="$model"
             ;;
         "deepseek"|"ds")
-            model="${DEEPSEEK_MODEL:-deepseek-chat}"
-            small="${HAIKU_MODEL:-${DEEPSEEK_MODEL:-deepseek-chat}}"
+            model="${DEEPSEEK_MODEL:-deepseek-v4-pro}"
+            small="${HAIKU_MODEL:-${DEEPSEEK_MODEL:-deepseek-v4-pro}}"
             default_sonnet="${SONNET_MODEL:-$model}"
             default_opus="${OPUS_MODEL:-$model}"
             default_haiku="${HAIKU_MODEL:-$model}"
@@ -2114,7 +2114,7 @@ emit_env_exports() {
                 echo "export ANTHROPIC_BASE_URL='https://api.deepseek.com/anthropic'"
                 echo "if [ -f \"\$HOME/.ccm_config\" ]; then . \"\$HOME/.ccm_config\" >/dev/null 2>&1; fi"
                 echo "export ANTHROPIC_AUTH_TOKEN=\"\${DEEPSEEK_API_KEY}\""
-                local ds_model="${DEEPSEEK_MODEL:-deepseek-chat}"
+                local ds_model="${DEEPSEEK_MODEL:-deepseek-v4-pro}"
                 echo "export ANTHROPIC_MODEL='${ds_model}'"
                 emit_default_models "${SONNET_MODEL:-$ds_model}" "${OPUS_MODEL:-$ds_model}" "${HAIKU_MODEL:-$ds_model}"
                 emit_subagent_model "${SUBAGENT_MODEL:-$ds_model}"
