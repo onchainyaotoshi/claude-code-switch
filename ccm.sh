@@ -676,7 +676,7 @@ get_provider_config() {
             fi
             config_token_var="XIAOMI_API_KEY"
             config_model="${XIAOMI_MODEL:-mimo-v2.5-pro}"
-            config_base_url="https://api.xiaomimimo.com/anthropic"
+            config_base_url="https://token-plan-sgp.xiaomimimo.com/anthropic"
             ;;
         "seed"|"doubao")
             if ! is_effectively_set "$ARK_API_KEY"; then
@@ -2263,7 +2263,7 @@ emit_env_exports() {
             fi
             local xiaomi_model="${XIAOMI_MODEL:-mimo-v2.5-pro}"
             echo "$prelude"
-            echo "export ANTHROPIC_BASE_URL='https://api.xiaomimimo.com/anthropic'"
+            echo "export ANTHROPIC_BASE_URL='https://token-plan-sgp.xiaomimimo.com/anthropic'"
             echo "if [ -f \"\$HOME/.ccm_config\" ]; then . \"\$HOME/.ccm_config\" >/dev/null 2>&1; fi"
             echo "export ANTHROPIC_AUTH_TOKEN=\"\${XIAOMI_API_KEY}\""
             echo "export ANTHROPIC_MODEL='${xiaomi_model}'"
