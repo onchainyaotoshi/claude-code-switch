@@ -535,10 +535,10 @@ project_write_settings() {
   "env": {
     "ANTHROPIC_BASE_URL": "${config_base_url}",
     "ANTHROPIC_MODEL": "${config_model}",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "${config_model}",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "${config_model}",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "${config_model}",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "${config_model}"$([[ -n "$config_token" ]] && echo ",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "${SONNET_MODEL:-${config_model}}",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "${OPUS_MODEL:-${config_model}}",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "${HAIKU_MODEL:-${config_model}}",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "${SUBAGENT_MODEL:-${config_model}}"$([[ -n "$config_token" ]] && echo ",
     \"ANTHROPIC_AUTH_TOKEN\": \"$config_token\"")
   }
 }
@@ -777,10 +777,10 @@ existing['ccmRegion'] = '$region'
 existing['env'] = {
     'ANTHROPIC_BASE_URL': '$config_base_url',
     'ANTHROPIC_MODEL': '$config_model',
-    'ANTHROPIC_DEFAULT_SONNET_MODEL': '$config_model',
-    'ANTHROPIC_DEFAULT_OPUS_MODEL': '$config_model',
-    'ANTHROPIC_DEFAULT_HAIKU_MODEL': '$config_model',
-    'CLAUDE_CODE_SUBAGENT_MODEL': '$config_model'
+    'ANTHROPIC_DEFAULT_SONNET_MODEL': '${SONNET_MODEL:-$config_model}',
+    'ANTHROPIC_DEFAULT_OPUS_MODEL': '${OPUS_MODEL:-$config_model}',
+    'ANTHROPIC_DEFAULT_HAIKU_MODEL': '${HAIKU_MODEL:-$config_model}',
+    'CLAUDE_CODE_SUBAGENT_MODEL': '${SUBAGENT_MODEL:-$config_model}'
 }
 $(if [[ -n "$config_token" ]]; then echo "existing['env']['ANTHROPIC_AUTH_TOKEN'] = '$config_token'"; fi)
 
@@ -799,10 +799,10 @@ PYTHON_EOF
   "env": {
     "ANTHROPIC_BASE_URL": "$config_base_url",
     "ANTHROPIC_MODEL": "$config_model",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "$config_model",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "$config_model",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "$config_model",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "$config_model"$([[ -n "$config_token" ]] && echo ",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "${SONNET_MODEL:-$config_model}",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "${OPUS_MODEL:-$config_model}",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "${HAIKU_MODEL:-$config_model}",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "${SUBAGENT_MODEL:-$config_model}"$([[ -n "$config_token" ]] && echo ",
     \"ANTHROPIC_AUTH_TOKEN\": \"$config_token\"")
   }
 }
@@ -1547,11 +1547,11 @@ switch_to_deepseek() {
         # 官方 Deepseek 的 Anthropic 兼容端点
         export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"
         export ANTHROPIC_AUTH_TOKEN="$DEEPSEEK_API_KEY"
-        export ANTHROPIC_MODEL="deepseek-chat"
-        export ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek/deepseek-v3.2"
-        export ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek/deepseek-v3.2"
-        export ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek/deepseek-v3.2"
-        export CLAUDE_CODE_SUBAGENT_MODEL="$ANTHROPIC_MODEL"
+        export ANTHROPIC_MODEL="${DEEPSEEK_MODEL:-deepseek-chat}"
+        export ANTHROPIC_DEFAULT_SONNET_MODEL="${SONNET_MODEL:-${DEEPSEEK_MODEL:-deepseek-chat}}"
+        export ANTHROPIC_DEFAULT_OPUS_MODEL="${OPUS_MODEL:-${DEEPSEEK_MODEL:-deepseek-chat}}"
+        export ANTHROPIC_DEFAULT_HAIKU_MODEL="${HAIKU_MODEL:-${DEEPSEEK_MODEL:-deepseek-chat}}"
+        export CLAUDE_CODE_SUBAGENT_MODEL="${SUBAGENT_MODEL:-$ANTHROPIC_MODEL}"
         echo -e "${GREEN}✅ $(t 'switched_to') Deepseek（$(t 'official')）${NC}"
     else
         echo -e "${RED}❌ Please configure DEEPSEEK_API_KEY${NC}"
@@ -2034,11 +2034,11 @@ emit_openrouter_exports() {
             default_haiku="$model"
             ;;
         "deepseek"|"ds")
-            model="deepseek/deepseek-v3.2"
-            small="deepseek/deepseek-v3.2"
-            default_sonnet="$model"
-            default_opus="$model"
-            default_haiku="$model"
+            model="${DEEPSEEK_MODEL:-deepseek-chat}"
+            small="${HAIKU_MODEL:-${DEEPSEEK_MODEL:-deepseek-chat}}"
+            default_sonnet="${SONNET_MODEL:-$model}"
+            default_opus="${OPUS_MODEL:-$model}"
+            default_haiku="${HAIKU_MODEL:-$model}"
             ;;
         "glm"|"glm5")
             model="z-ai/glm-5"
@@ -2116,8 +2116,8 @@ emit_env_exports() {
                 echo "export ANTHROPIC_AUTH_TOKEN=\"\${DEEPSEEK_API_KEY}\""
                 local ds_model="${DEEPSEEK_MODEL:-deepseek-chat}"
                 echo "export ANTHROPIC_MODEL='${ds_model}'"
-                emit_default_models "deepseek/deepseek-v3.2" "deepseek/deepseek-v3.2" "deepseek/deepseek-v3.2"
-                emit_subagent_model "$ds_model"
+                emit_default_models "${SONNET_MODEL:-$ds_model}" "${OPUS_MODEL:-$ds_model}" "${HAIKU_MODEL:-$ds_model}"
+                emit_subagent_model "${SUBAGENT_MODEL:-$ds_model}"
             else
                 echo -e "${RED}❌ Please configure DEEPSEEK_API_KEY${NC}" >&2
                 return 1
