@@ -173,6 +173,9 @@ QWEN_API_KEY=your-qwen-api-key
 # Xiaomi MiMo
 XIAOMI_API_KEY=your-xiaomi-api-key
 
+# HCNSEC (幻城网安)
+HCNSEC_API_KEY=your-hcnsec-api-key
+
 # Claude (如果使用API key而非Pro订阅)
 CLAUDE_API_KEY=your-claude-api-key
 
@@ -193,6 +196,7 @@ SEED_MODEL=ark-code-latest
 BYTEPLUS_MODEL=ark-code-latest
 XIAOMI_MODEL=mimo-v2.5-pro
 STEPFUN_MODEL=step-3.5-flash
+HCNSEC_MODEL=deepseek-v4-pro
 
 EOF
         echo -e "${YELLOW}⚠️  $(t 'config_created'): $CONFIG_FILE${NC}" >&2
@@ -291,6 +295,9 @@ QWEN_API_KEY=your-qwen-api-key
 # Xiaomi MiMo
 XIAOMI_API_KEY=your-xiaomi-api-key
 
+# HCNSEC (幻城网安)
+HCNSEC_API_KEY=your-hcnsec-api-key
+
 # Claude (如果使用API key而非Pro订阅)
 CLAUDE_API_KEY=your-claude-api-key
 
@@ -311,6 +318,7 @@ SEED_MODEL=ark-code-latest
 BYTEPLUS_MODEL=ark-code-latest
 XIAOMI_MODEL=mimo-v2.5-pro
 STEPFUN_MODEL=step-3.5-flash
+HCNSEC_MODEL=deepseek-v4-pro
 
 EOF
     echo -e "${YELLOW}⚠️  $(t 'config_created'): $CONFIG_FILE${NC}" >&2
@@ -564,11 +572,16 @@ project_show_usage() {
     echo "  qwen [global|china]   - Qwen" >&2
     echo "  minimax [global|china] - MiniMax" >&2
     echo "  seed                  - Doubao/Seed" >&2
+    echo "  byteplus              - BytePlus ModelArk" >&2
+    echo "  xiaomi                - Xiaomi MiMo" >&2
+    echo "  stepfun               - StepFun" >&2
+    echo "  hcnsec                - HCNSEC (幻城网安)" >&2
     echo "  claude                - Claude (official)" >&2
     echo "" >&2
     echo "Examples:" >&2
     echo "  ccm project glm global   # Use GLM for this project" >&2
     echo "  ccm project seed         # Use Seed for this project" >&2
+    echo "  ccm project hcnsec       # Use HCNSEC for this project" >&2
     echo "  ccm project reset        # Remove project override" >&2
 }
 
@@ -695,6 +708,15 @@ get_provider_config() {
             config_token_var="STEPFUN_API_KEY"
             config_model="${STEPFUN_MODEL:-step-3.5-flash}"
             config_base_url="https://api.stepfun.ai/v1/anthropic"
+            ;;
+        "hcnsec")
+            if ! is_effectively_set "$HCNSEC_API_KEY"; then
+                echo -e "${RED}❌ Please configure HCNSEC_API_KEY first${NC}" >&2
+                return 1
+            fi
+            config_token_var="HCNSEC_API_KEY"
+            config_model="${HCNSEC_MODEL:-deepseek-v4-pro}"
+            config_base_url="https://api.hcnsec.cn"
             ;;
         "claude"|"sonnet"|"s")
             config_token_var=""  # Uses Claude Pro subscription
@@ -879,11 +901,16 @@ user_show_usage() {
     echo "  qwen [global|china]   - Qwen" >&2
     echo "  minimax [global|china] - MiniMax" >&2
     echo "  seed                  - Doubao/Seed" >&2
+    echo "  byteplus              - BytePlus ModelArk" >&2
+    echo "  xiaomi                - Xiaomi MiMo" >&2
+    echo "  stepfun               - StepFun" >&2
+    echo "  hcnsec                - HCNSEC (幻城网安)" >&2
     echo "  claude                - Claude (official)" >&2
     echo "" >&2
     echo "Examples:" >&2
     echo "  ccm user glm global   # Use GLM globally" >&2
     echo "  ccm user deepseek     # Use DeepSeek globally" >&2
+    echo "  ccm user hcnsec       # Use HCNSEC globally" >&2
     echo "  ccm user reset        # Remove, use env vars instead" >&2
 }
 
@@ -1519,6 +1546,7 @@ show_status() {
     echo "   ARK_API_KEY: $(mask_presence ARK_API_KEY)"
     echo "   QWEN_API_KEY: $(mask_presence QWEN_API_KEY)"
     echo "   STEPFUN_API_KEY: $(mask_presence STEPFUN_API_KEY)"
+    echo "   HCNSEC_API_KEY: $(mask_presence HCNSEC_API_KEY)"
     echo "   OPENROUTER_API_KEY: $(mask_presence OPENROUTER_API_KEY)"
     echo ""
 }
@@ -1806,18 +1834,19 @@ show_help() {
     echo "  minimax [global|china]  - env minimax (default: global)"
     echo "  seed [doubao|glm|deepseek|kimi] - env 豆包 Seed-Code"
     echo "  stepfun                 - env StepFun"
+  echo "  hcnsec                  - env HCNSEC (幻城网安)"
     echo "  claude, sonnet, s       - env claude (official)"
     echo "  open <provider>         - env OpenRouter (run 'ccm open' for help)"
     echo ""
     echo -e "${YELLOW}User-level Settings (highest priority):${NC}"
     echo "  user <provider> [region] - write to ~/.claude/settings.json"
     echo "  user reset               - remove ccm settings, restore env var control"
-    echo "  Providers: glm, deepseek, kimi, qwen, minimax, seed, stepfun, claude"
+    echo "  Providers: glm, deepseek, kimi, qwen, minimax, seed, stepfun, hcnsec, claude"
     echo ""
     echo -e "${YELLOW}Project-level Settings:${NC}"
     echo "  project <provider> [region] - write .claude/settings.local.json (project-only)"
     echo "  project reset              - remove project override"
-    echo "  Providers: glm, deepseek, kimi, qwen, minimax, seed, claude"
+    echo "  Providers: glm, deepseek, kimi, qwen, minimax, seed, hcnsec, claude"
     echo ""
     echo -e "${YELLOW}Claude Pro Account Management:${NC}"
     echo "  save-account <name>     - Save current Claude Pro account"
@@ -1856,6 +1885,7 @@ show_help() {
     echo "  🐪 Qwen                 - qwen3-max-2026-01-23 / qwen3-coder-plus (Coding Plan)"
     echo "  🇨🇳 GLM                 - glm-5 (api.z.ai / open.bigmodel.cn)"
     echo "  🧠 Claude Sonnet 4.5    - claude-sonnet-4-5-20250929"
+  echo "  🛡️ HCNSEC               - deepseek-v4-pro (api.hcnsec.cn)"
 }
 
 # 将缺失的模型ID覆盖项追加到配置文件（仅追加缺失项，不覆盖已存在的配置）
@@ -1872,6 +1902,7 @@ ensure_model_override_defaults() {
         "CLAUDE_MODEL=claude-sonnet-4-5-20250929"
         "OPUS_MODEL=claude-opus-4-6"
         "HAIKU_MODEL=claude-haiku-4-5-20251001"
+        "HCNSEC_MODEL=deepseek-v4-pro"
     )
     local added_header=0
     for pair in "${pairs[@]}"; do
@@ -2321,6 +2352,20 @@ emit_env_exports() {
             emit_default_models "$stepfun_model" "$stepfun_model" "$stepfun_model"
             emit_subagent_model "$stepfun_model"
             ;;
+        "hcnsec")
+            if ! is_effectively_set "$HCNSEC_API_KEY"; then
+                echo -e "${RED}❌ Please configure HCNSEC_API_KEY${NC}" >&2
+                return 1
+            fi
+            echo "$prelude"
+            echo "export ANTHROPIC_BASE_URL='https://api.hcnsec.cn'"
+            echo "if [ -f \"\$HOME/.ccm_config\" ]; then . \"\$HOME/.ccm_config\" >/dev/null 2>&1; fi"
+            echo "export ANTHROPIC_AUTH_TOKEN=\"\${HCNSEC_API_KEY}\""
+            local hcnsec_model="${HCNSEC_MODEL:-deepseek-v4-pro}"
+            echo "export ANTHROPIC_MODEL='${hcnsec_model}'"
+            emit_default_models "$hcnsec_model" "$hcnsec_model" "$hcnsec_model"
+            emit_subagent_model "$hcnsec_model"
+            ;;
         "claude"|"sonnet"|"s")
             echo "$prelude"
             # 官方 Anthropic 网关
@@ -2427,6 +2472,9 @@ main() {
         "stepfun")
             emit_env_exports stepfun
             ;;
+        "hcnsec")
+            emit_env_exports hcnsec
+            ;;
         "claude"|"sonnet"|"s")
             emit_env_exports claude
             ;;
@@ -2441,7 +2489,7 @@ main() {
             shift
             local project_action="${1:-}"
             case "$project_action" in
-                "glm"|"deepseek"|"ds"|"kimi"|"kimi2"|"qwen"|"minimax"|"mm"|"byteplus"|"xiaomi"|"seed"|"doubao"|"claude"|"sonnet"|"s")
+                "glm"|"deepseek"|"ds"|"kimi"|"kimi2"|"qwen"|"minimax"|"mm"|"byteplus"|"xiaomi"|"seed"|"doubao"|"stepfun"|"hcnsec"|"claude"|"sonnet"|"s")
                     project_write_settings "$project_action" "${2:-}"
                     ;;
                 "reset")
@@ -2461,7 +2509,7 @@ main() {
             shift
             local user_action="${1:-}"
             case "$user_action" in
-                "glm"|"deepseek"|"ds"|"kimi"|"kimi2"|"qwen"|"minimax"|"mm"|"byteplus"|"xiaomi"|"seed"|"doubao"|"stepfun"|"claude"|"sonnet"|"s")
+                "glm"|"deepseek"|"ds"|"kimi"|"kimi2"|"qwen"|"minimax"|"mm"|"byteplus"|"xiaomi"|"seed"|"doubao"|"stepfun"|"hcnsec"|"claude"|"sonnet"|"s")
                     user_write_settings "$user_action" "${2:-}"
                     ;;
                 "reset")
