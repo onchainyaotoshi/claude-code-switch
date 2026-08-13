@@ -6,8 +6,15 @@ Use this skill when the user wants to add a new provider (e.g., "add provider X"
 
 1. Ask the user for the provider name/alias, base URL, default model, and auth env var name if they haven't provided them.
 2. Check if the provider needs region handling (global/china). Most don't.
-3. Verify the **exact model ID casing** with the provider's dashboard/documentation (e.g., `DeepSeek-V4-Pro` vs `deepseek-v4-pro`).
-4. Confirm the design in chat before editing — this is a bounded, multi-file change.
+3. Verify the **exact model ID** with the provider's dashboard/documentation — including casing. Some gateways are **case-sensitive**: on HCNSEC, `DeepSeek-V4-Pro` is accepted but `deepseek-v4-pro` returns `model_not_found` (HTTP 503). Copy the ID character-for-character.
+4. The default model ID must be **byte-identical in every site** that references it, or you ship a latent bug that only bites users whose `PROVIDER_MODEL` is unset. When you set or correct the ID, update **all** of these in `ccm.sh` together:
+   - `load_config()` template · `create_default_config()` template
+   - `get_provider_config()` fallback (`${PROVIDER_MODEL:-<id>}`)
+   - `emit_env_exports()` fallback (`${PROVIDER_MODEL:-<id>}`) ← **most commonly missed**
+   - `ensure_model_override_defaults()` pair
+   - `show_help()` provider line
+   A partial fix is the exact failure mode that bit HCNSEC: commit `80ebb7b` corrected five sites but left the `emit_env_exports()` fallback lowercase, which only surfaced when a user's `HCNSEC_MODEL` was empty.
+5. Confirm the design in chat before editing — this is a bounded, multi-file change.
 
 ## Files to edit
 
@@ -54,22 +61,46 @@ echo "BASE_URL=$ANTHROPIC_BASE_URL MODEL=$ANTHROPIC_MODEL"
 ./ccm user help | grep <provider>
 ```
 
-If the user can provide a real API key, also test a live request (e.g. `curl` the provider's `/v1/models` or chat endpoint) to confirm the exact model ID works.
+**Exercise the fallback in isolation.** The `eval` test above can pull `PROVIDER_MODEL` from your own `~/.ccm_config` and never hit the `${PROVIDER_MODEL:-<id>}` fallback — which is how the HCNSEC casing bug hid through a release. Force the fallback to fire with the config out of the way, and check the emitted ID character-for-character:
 
-## Reinstall the updated functions
+```bash
+TMPHOME=$(mktemp -d)
+PROVIDER_API_KEY=sk-test PROVIDER_MODEL="" HOME="$TMPHOME" bash ccm.sh <provider> 2>/dev/null | grep ANTHROPIC_MODEL
+# Expect: export ANTHROPIC_MODEL='<exact-id>'  — wrong casing here = broken fallback.
+rm -rf "$TMPHOME"
+```
 
-Because `install.sh` injects `ccm()` and `ccc()` functions directly into shell rc files (`~/.bashrc`, `~/.zshrc`, etc.), code changes to the launcher are **not live** until the user reloads them. Offer to run this for the user, or ask them to run it:
+With a **real** key, send a live Anthropic-format request to `${ANTHROPIC_BASE_URL}/v1/messages` using that fallback model ID. A `model_not_found` (503) means the ID is wrong even though the emit looked correct — this is the definitive check (it's what caught the HCNSEC bug).
+
+## Reinstall, then test the installed copy
+
+`git pull` alone is not enough — `install.sh` does two things, and both are required for a change to go live:
+
+1. **It copies `ccm.sh` into the data dir** (`~/.local/share/ccm/ccm.sh`). The installed `ccm()`/`ccc()` functions run **that copy, not the repo file** — so a change that lives entirely inside `ccm.sh` (e.g., a model-ID fix) is invisible to the installed `ccm` until you reinstall. This is the trap that let the HCNSEC bug persist: the repo was fixed in commit `80ebb7b`, but the user's data-dir copy stayed stale, so `ccm hcnsec` kept failing until reinstall.
+2. **It re-injects the `ccm()`/`ccc()` function definitions** into shell rc files. Changes to the launcher itself (e.g., a new provider in `ccc`'s `is_known_model()`) need this — the in-memory function isn't updated by a `git pull`.
+
+Offer to run the reinstall, or ask the user to:
 
 ```bash
 cd /path/to/claude-code-switch
-git pull origin main
 ./install.sh
-# Reload shell config, or better: open a new terminal
-source ~/.bashrc     # for bash
-source ~/.zshrc      # for zsh
+source ~/.bashrc     # bash — or open a new terminal
+source ~/.zshrc      # zsh
 ```
 
-Important: a simple `git pull` is not enough — the shell function definition must be re-injected.
+Then **test the installed copy**. The pre-commit verification above tested the *repo* file; this confirms the *data-dir* copy (the one actually used) matches and responds live — it's the only way to catch a stale installed copy:
+
+```bash
+# Installed ccm.sh emits the right model:
+bash ~/.local/share/ccm/ccm.sh <provider> 2>/dev/null | grep ANTHROPIC_MODEL
+# With a real key, fire a live Anthropic-format request end-to-end through the installed path:
+eval "$(bash ~/.local/share/ccm/ccm.sh <provider>)" && \
+  curl -s -w '\n[HTTP %{http_code}]\n' "${ANTHROPIC_BASE_URL}/v1/messages" \
+    -H "x-api-key: ${ANTHROPIC_AUTH_TOKEN}" -H 'anthropic-version: 2023-06-01' \
+    -d "{\"model\":\"${ANTHROPIC_MODEL}\",\"max_tokens\":64,\"messages\":[{\"role\":\"user\",\"content\":\"ping\"}]}"
+```
+
+A `model_not_found` (503) here means the installed copy is still wrong (stale data dir) — re-run `./install.sh`.
 
 ## Post-change notes for the user
 
