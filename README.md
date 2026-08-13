@@ -125,6 +125,7 @@ ccm claude            # Claude official
 ```bash
 ccc glm global        # Switch to GLM global, then launch
 ccc glm china         # Switch to GLM China, then launch
+ccc hcnsec            # Switch to HCNSEC, then launch
 ccc open glm          # Via OpenRouter
 ```
 
@@ -319,6 +320,7 @@ eval "$(./ccm.sh glm china)"
 # Or use the wrapper scripts directly
 ./ccm glm global         # Just prints exports
 ./ccc glm china          # Switch + launch
+./ccc hcnsec             # Switch + launch with HCNSEC
 ```
 
 ---
@@ -361,6 +363,7 @@ cd claude-code-switch
 - **HCNSEC provider** - Added direct support for 幻城网安 (`ccm hcnsec`, `ccm user hcnsec`, `ccm project hcnsec`)
   - Base URL: `https://api.hcnsec.cn`
   - Default model: `deepseek-v4-pro`
+- **ccc launcher support** - `ccc hcnsec` and `ccc stepfun` now recognized as provider switches
 - **Updated provider documentation** - Added BytePlus, Xiaomi, StepFun, and HCNSEC to `ccm project` / `ccm user` usage lists
 
 ### v2.4.0 (2025-02)

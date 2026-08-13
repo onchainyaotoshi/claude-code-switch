@@ -125,6 +125,7 @@ ccm claude            # Claude 官方
 ```bash
 ccc glm global        # 切换到 GLM 海外，然后启动
 ccc glm china         # 切换到 GLM 国内，然后启动
+ccc hcnsec            # 切换到幻城网安 (HCNSEC)，然后启动
 ccc open glm          # 通过 OpenRouter
 ```
 
@@ -310,6 +311,7 @@ eval "$(./ccm.sh glm china)"
 # 或直接使用包装脚本
 ./ccm glm global         # 仅输出 export 语句
 ./ccc glm china          # 切换 + 启动
+./ccc hcnsec             # 切换 + 启动幻城网安 (HCNSEC)
 ```
 
 ---
@@ -352,6 +354,7 @@ cd claude-code-switch
 - **新增 HCNSEC 提供商** - 添加幻城网安直连支持（`ccm hcnsec`、`ccm user hcnsec`、`ccm project hcnsec`）
   - Base URL：`https://api.hcnsec.cn`
   - 默认模型：`deepseek-v4-pro`
+- **ccc 启动器支持** - `ccc hcnsec` 和 `ccc stepfun` 现在被识别为 provider 切换
 - **更新提供商文档** - 在 `ccm project` / `ccm user` 用法列表中加入 BytePlus、Xiaomi、StepFun 和 HCNSEC
 
 ### v2.4.0 (2025-02)

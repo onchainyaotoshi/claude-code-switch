@@ -275,7 +275,7 @@ ccc() {
     echo "  ccc glm --dangerously-skip-permissions    # Launch GLM with options"
     echo ""
     echo "Available models:"
-    echo "  Official: deepseek, glm, kimi, qwen, byteplus, xiaomi, seed|doubao, claude, minimax"
+    echo "  Official: deepseek, glm, kimi, qwen, byteplus, xiaomi, seed|doubao, claude, minimax, stepfun, hcnsec"
     echo "  OpenRouter: open <provider>"
     echo "  Account:  <account> | claude:<account>"
     return 1
@@ -303,7 +303,7 @@ ccc() {
   # Helper: known model keyword
   _is_known_model() {
     case "\$1" in
-      deepseek|ds|glm|glm5|kimi|kimi2|qwen|minimax|mm|byteplus|xiaomi|seed|doubao|claude|sonnet|s|open)
+      deepseek|ds|glm|glm5|kimi|kimi2|qwen|minimax|mm|byteplus|xiaomi|seed|doubao|claude|sonnet|s|stepfun|hcnsec|open)
         return 0 ;;
       *)
         return 1 ;;
@@ -529,7 +529,7 @@ Examples:
   ccc claude:work                  # Switch to 'work' account and use Claude
 
 Available models:
-  Official: deepseek, glm, kimi, qwen, byteplus, xiaomi, seed|doubao, claude, minimax
+  Official: deepseek, glm, kimi, qwen, byteplus, xiaomi, seed|doubao, claude, minimax, stepfun, hcnsec
   OpenRouter: open <provider>
   Account:  <account> | claude:<account>
 EOF2
@@ -567,7 +567,7 @@ fi
 
 is_known_model() {
     case "$1" in
-        deepseek|ds|glm|glm5|kimi|kimi2|qwen|minimax|mm|byteplus|xiaomi|seed|doubao|claude|sonnet|s|open)
+        deepseek|ds|glm|glm5|kimi|kimi2|qwen|minimax|mm|byteplus|xiaomi|seed|doubao|claude|sonnet|s|stepfun|hcnsec|open)
             return 0 ;;
         *)
             return 1 ;;
@@ -651,7 +651,7 @@ Examples:
   ccc claude:work                  # Switch to 'work' account and use Claude
 
 Available models:
-  Official: deepseek, glm, kimi, qwen, byteplus, xiaomi, seed|doubao, claude, minimax
+  Official: deepseek, glm, kimi, qwen, byteplus, xiaomi, seed|doubao, claude, minimax, stepfun, hcnsec
   OpenRouter: open <provider>
   Account:  <account> | claude:<account>
 EOF2
@@ -689,7 +689,7 @@ fi
 
 is_known_model() {
     case "$1" in
-        deepseek|ds|glm|glm5|kimi|kimi2|qwen|minimax|mm|byteplus|xiaomi|seed|doubao|claude|sonnet|s|open)
+        deepseek|ds|glm|glm5|kimi|kimi2|qwen|minimax|mm|byteplus|xiaomi|seed|doubao|claude|sonnet|s|stepfun|hcnsec|open)
             return 0 ;;
         *)
             return 1 ;;
