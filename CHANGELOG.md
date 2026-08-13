@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.3.1] - 2026-08-13
+
+### Added
+- ✨ **HCNSEC provider support**: Added direct provider for 幻城网安 (Xinjiang Huancheng Network Security)
+  - Command: `ccm hcnsec` (also `ccm user hcnsec` and `ccm project hcnsec`)
+  - Base URL: `https://api.hcnsec.cn`
+  - Default model: `deepseek-v4-pro`
+  - Auth env: `HCNSEC_API_KEY`
+- 📚 **Updated provider usage lists**: `ccm project help` and `ccm user help` now document BytePlus, Xiaomi, StepFun, and HCNSEC
+
 ## [2.3.0] - 2026-01-26
 
 ### Changed

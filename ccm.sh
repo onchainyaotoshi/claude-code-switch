@@ -1822,7 +1822,7 @@ switch_to_seed() {
 
 # 显示帮助信息
 show_help() {
-    echo -e "${BLUE}🔧 $(t 'switching_info') v2.3.0${NC}"
+    echo -e "${BLUE}🔧 $(t 'switching_info') v2.3.1${NC}"
     echo ""
     echo -e "${YELLOW}$(t 'usage'):${NC} $(basename "$0") [options]"
     echo ""

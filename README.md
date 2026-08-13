@@ -93,6 +93,7 @@ GLM_API_KEY=...
 QWEN_API_KEY=...
 MINIMAX_API_KEY=...
 ARK_API_KEY=...           # For Doubao/Seed
+HCNSEC_API_KEY=...        # For HCNSEC (幻城网安)
 OPENROUTER_API_KEY=...    # For OpenRouter
 CLAUDE_API_KEY=...        # Optional, for Claude API (vs subscription)
 ```
@@ -116,6 +117,7 @@ ccm kimi china        # Kimi China
 ccm qwen global       # Qwen global
 ccm minimax           # MiniMax
 ccm seed              # Doubao/Seed
+ccm hcnsec            # HCNSEC (幻城网安)
 ccm claude            # Claude official
 ```
 
@@ -162,6 +164,7 @@ ccc                    # Show ccc usage (no args)
 | MiniMax | `ccm minimax [global\|china]` | global (default) | `api.minimax.io/anthropic` |
 | | | china | `api.minimaxi.com/anthropic` |
 | Seed/Doubao | `ccm seed [variant]` | - | `ark.cn-beijing.volces.com/api/coding` |
+| HCNSEC | `ccm hcnsec` | - | `api.hcnsec.cn` |
 | Claude | `ccm claude` | - | `api.anthropic.com` |
 
 > **GLM Coding Plan**: [bigmodel.cn/glm-coding](https://www.bigmodel.cn/glm-coding?ic=5XMIOZPPXB)
@@ -226,6 +229,7 @@ Write settings directly to `~/.claude/settings.json`. This overrides everything 
 ccm user glm global      # GLM global for all projects
 ccm user glm china       # GLM China for all projects
 ccm user deepseek        # DeepSeek for all projects
+ccm user hcnsec          # HCNSEC for all projects
 ccm user claude          # Claude official for all projects
 
 # Reset to environment variable control
@@ -244,6 +248,7 @@ Override settings for a specific project (keeps global settings intact):
 # In your project directory
 ccm project glm global    # Use GLM for this project only
 ccm project glm china     # Use GLM China for this project
+ccm project hcnsec       # Use HCNSEC for this project
 ccm project reset         # Remove project override
 ```
 
@@ -282,6 +287,7 @@ GLM_API_KEY=...
 QWEN_API_KEY=...
 MINIMAX_API_KEY=...
 ARK_API_KEY=...
+HCNSEC_API_KEY=...
 OPENROUTER_API_KEY=...
 CLAUDE_API_KEY=...
 
@@ -293,6 +299,7 @@ QWEN_MODEL=qwen3-max-2026-01-23
 GLM_MODEL=glm-5
 MINIMAX_MODEL=MiniMax-M2.5
 SEED_MODEL=ark-code-latest
+HCNSEC_MODEL=deepseek-v4-pro
 CLAUDE_MODEL=claude-sonnet-4-5-20250929
 OPUS_MODEL=claude-opus-4-6
 HAIKU_MODEL=claude-haiku-4-5-20251001
@@ -349,6 +356,12 @@ cd claude-code-switch
 ---
 
 ## What's New
+
+### v2.3.1 (2026-08-13)
+- **HCNSEC provider** - Added direct support for 幻城网安 (`ccm hcnsec`, `ccm user hcnsec`, `ccm project hcnsec`)
+  - Base URL: `https://api.hcnsec.cn`
+  - Default model: `deepseek-v4-pro`
+- **Updated provider documentation** - Added BytePlus, Xiaomi, StepFun, and HCNSEC to `ccm project` / `ccm user` usage lists
 
 ### v2.4.0 (2025-02)
 - **`ccm user` command** - Write settings directly to `~/.claude/settings.json` (highest priority)

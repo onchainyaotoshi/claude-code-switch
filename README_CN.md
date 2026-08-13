@@ -93,6 +93,7 @@ GLM_API_KEY=...
 QWEN_API_KEY=...
 MINIMAX_API_KEY=...
 ARK_API_KEY=...           # 豆包/Seed
+HCNSEC_API_KEY=...        # 幻城网安 (HCNSEC)
 OPENROUTER_API_KEY=...    # OpenRouter
 CLAUDE_API_KEY=...        # 可选，用于 Claude API（非订阅）
 ```
@@ -116,6 +117,7 @@ ccm kimi china        # Kimi 国内
 ccm qwen global       # Qwen 海外
 ccm minimax           # MiniMax
 ccm seed              # 豆包/Seed
+ccm hcnsec            # 幻城网安 (HCNSEC)
 ccm claude            # Claude 官方
 ```
 
@@ -162,6 +164,7 @@ ccc                    # 显示 ccc 用法（无参数）
 | MiniMax | `ccm minimax [global\|china]` | global（默认） | `api.minimax.io/anthropic` |
 | | | china | `api.minimaxi.com/anthropic` |
 | 豆包/Seed | `ccm seed [variant]` | - | `ark.cn-beijing.volces.com/api/coding` |
+| 幻城网安 HCNSEC | `ccm hcnsec` | - | `api.hcnsec.cn` |
 | Claude | `ccm claude` | - | `api.anthropic.com` |
 
 > **GLM Coding 套餐**：[bigmodel.cn/glm-coding](https://www.bigmodel.cn/glm-coding?ic=5XMIOZPPXB)
@@ -217,6 +220,7 @@ ccm delete-account work
 ccm user glm global      # 所有项目使用 GLM 海外
 ccm user glm china       # 所有项目使用 GLM 国内
 ccm user deepseek        # 所有项目使用 DeepSeek
+ccm user hcnsec          # 所有项目使用幻城网安 (HCNSEC)
 ccm user claude          # 所有项目使用 Claude 官方
 
 # 重置为环境变量控制
@@ -235,6 +239,7 @@ ccm user reset           # 移除 ccm 设置，使用环境变量
 # 在项目目录中
 ccm project glm global    # 仅此项目使用 GLM 海外
 ccm project glm china     # 仅此项目使用 GLM 国内
+ccm project hcnsec       # 仅此项目使用幻城网安 (HCNSEC)
 ccm project reset         # 移除项目覆盖
 ```
 
@@ -273,6 +278,7 @@ GLM_API_KEY=...
 QWEN_API_KEY=...
 MINIMAX_API_KEY=...
 ARK_API_KEY=...
+HCNSEC_API_KEY=...
 OPENROUTER_API_KEY=...
 CLAUDE_API_KEY=...
 
@@ -284,6 +290,7 @@ QWEN_MODEL=qwen3-max-2026-01-23
 GLM_MODEL=glm-5
 MINIMAX_MODEL=MiniMax-M2.5
 SEED_MODEL=ark-code-latest
+HCNSEC_MODEL=deepseek-v4-pro
 CLAUDE_MODEL=claude-sonnet-4-5-20250929
 OPUS_MODEL=claude-opus-4-6
 HAIKU_MODEL=claude-haiku-4-5-20251001
@@ -340,6 +347,12 @@ cd claude-code-switch
 ---
 
 ## 更新日志
+
+### v2.3.1 (2026-08-13)
+- **新增 HCNSEC 提供商** - 添加幻城网安直连支持（`ccm hcnsec`、`ccm user hcnsec`、`ccm project hcnsec`）
+  - Base URL：`https://api.hcnsec.cn`
+  - 默认模型：`deepseek-v4-pro`
+- **更新提供商文档** - 在 `ccm project` / `ccm user` 用法列表中加入 BytePlus、Xiaomi、StepFun 和 HCNSEC
 
 ### v2.4.0 (2025-02)
 - **`ccm user` 命令** - 直接写入 `~/.claude/settings.json`（最高优先级）
