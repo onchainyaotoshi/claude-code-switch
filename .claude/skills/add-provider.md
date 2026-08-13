@@ -6,7 +6,8 @@ Use this skill when the user wants to add a new provider (e.g., "add provider X"
 
 1. Ask the user for the provider name/alias, base URL, default model, and auth env var name if they haven't provided them.
 2. Check if the provider needs region handling (global/china). Most don't.
-3. Confirm the design in chat before editing — this is a bounded, multi-file change.
+3. Verify the **exact model ID casing** with the provider's dashboard/documentation (e.g., `DeepSeek-V4-Pro` vs `deepseek-v4-pro`).
+4. Confirm the design in chat before editing — this is a bounded, multi-file change.
 
 ## Files to edit
 
@@ -53,9 +54,13 @@ echo "BASE_URL=$ANTHROPIC_BASE_URL MODEL=$ANTHROPIC_MODEL"
 ./ccm user help | grep <provider>
 ```
 
+If the user can provide a real API key, also test a live request (e.g. `curl` the provider's `/v1/models` or chat endpoint) to confirm the exact model ID works.
+
 ## Post-change notes for the user
 
 Tell the user they must:
-1. Reinstall: `git pull`, `./install.sh`, then `source ~/.bashrc` / `source ~/.zshrc`.
+1. Reinstall: `git pull`, `./install.sh`, then `source ~/.bashrc` / `source ~/.zshrc` (or start a new shell).
 2. Manually add the new API key to `~/.ccm_config` (or delete the file and run `ccm config` to regenerate it).
-3. `ccm update-config` only auto-adds missing model overrides, not API key placeholders.
+3. Use the **exact model ID** shown in the provider's dashboard; wrong casing may cause channel/model errors.
+4. `ccm update-config` only auto-adds missing model overrides, not API key placeholders.
+5. If previous `~/.ccm_config` contained stale `ANTHROPIC_*` or `OLLAMA_*` exports, remove them — CCM exports these vars, the config should only hold keys and model overrides.

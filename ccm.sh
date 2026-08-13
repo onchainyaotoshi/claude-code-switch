@@ -196,7 +196,7 @@ SEED_MODEL=ark-code-latest
 BYTEPLUS_MODEL=ark-code-latest
 XIAOMI_MODEL=mimo-v2.5-pro
 STEPFUN_MODEL=step-3.5-flash
-HCNSEC_MODEL=deepseek-v4-pro
+HCNSEC_MODEL=DeepSeek-V4-Pro
 
 EOF
         echo -e "${YELLOW}⚠️  $(t 'config_created'): $CONFIG_FILE${NC}" >&2
@@ -318,7 +318,7 @@ SEED_MODEL=ark-code-latest
 BYTEPLUS_MODEL=ark-code-latest
 XIAOMI_MODEL=mimo-v2.5-pro
 STEPFUN_MODEL=step-3.5-flash
-HCNSEC_MODEL=deepseek-v4-pro
+HCNSEC_MODEL=DeepSeek-V4-Pro
 
 EOF
     echo -e "${YELLOW}⚠️  $(t 'config_created'): $CONFIG_FILE${NC}" >&2
@@ -715,7 +715,7 @@ get_provider_config() {
                 return 1
             fi
             config_token_var="HCNSEC_API_KEY"
-            config_model="${HCNSEC_MODEL:-deepseek-v4-pro}"
+            config_model="${HCNSEC_MODEL:-DeepSeek-V4-Pro}"
             config_base_url="https://api.hcnsec.cn"
             ;;
         "claude"|"sonnet"|"s")
@@ -1902,7 +1902,7 @@ ensure_model_override_defaults() {
         "CLAUDE_MODEL=claude-sonnet-4-5-20250929"
         "OPUS_MODEL=claude-opus-4-6"
         "HAIKU_MODEL=claude-haiku-4-5-20251001"
-        "HCNSEC_MODEL=deepseek-v4-pro"
+        "HCNSEC_MODEL=DeepSeek-V4-Pro"
     )
     local added_header=0
     for pair in "${pairs[@]}"; do

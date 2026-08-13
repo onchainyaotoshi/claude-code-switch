@@ -291,7 +291,7 @@ QWEN_MODEL=qwen3-max-2026-01-23
 GLM_MODEL=glm-5
 MINIMAX_MODEL=MiniMax-M2.5
 SEED_MODEL=ark-code-latest
-HCNSEC_MODEL=deepseek-v4-pro
+HCNSEC_MODEL=DeepSeek-V4-Pro
 CLAUDE_MODEL=claude-sonnet-4-5-20250929
 OPUS_MODEL=claude-opus-4-6
 HAIKU_MODEL=claude-haiku-4-5-20251001
@@ -353,7 +353,7 @@ cd claude-code-switch
 ### v2.3.1 (2026-08-13)
 - **新增 HCNSEC 提供商** - 添加幻城网安直连支持（`ccm hcnsec`、`ccm user hcnsec`、`ccm project hcnsec`）
   - Base URL：`https://api.hcnsec.cn`
-  - 默认模型：`deepseek-v4-pro`
+  - 默认模型：`DeepSeek-V4-Pro`（请使用 HCNSEC 控制台中显示的精确大小写）
 - **ccc 启动器支持** - `ccc hcnsec` 和 `ccc stepfun` 现在被识别为 provider 切换
 - **更新提供商文档** - 在 `ccm project` / `ccm user` 用法列表中加入 BytePlus、Xiaomi、StepFun 和 HCNSEC
 

@@ -8,6 +8,7 @@
   - Base URL: `https://api.hcnsec.cn`
   - Default model: `deepseek-v4-pro`
   - Auth env: `HCNSEC_API_KEY`
+  - Default model: `DeepSeek-V4-Pro` (case-sensitive, verified against HCNSEC console)
 - 🚀 **ccc launcher support**: Added `hcnsec` and `stepfun` to known model list so `ccc hcnsec` switches provider instead of treating it as a Claude Pro account
 - 📚 **Updated provider usage lists**: `ccm project help` and `ccm user help` now document BytePlus, Xiaomi, StepFun, and HCNSEC
 
