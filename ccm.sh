@@ -5,7 +5,7 @@
 # 功能: 在不同AI模型之间快速切换
 # 支持: Claude, Deepseek, GLM4.7, KIMI2
 # 作者: Peng
-# 版本: 2.3.0
+# 版本: 2.3.2
 ############################################################
 
 # 脚本颜色定义
@@ -1822,7 +1822,7 @@ switch_to_seed() {
 
 # 显示帮助信息
 show_help() {
-    echo -e "${BLUE}🔧 $(t 'switching_info') v2.3.1${NC}"
+    echo -e "${BLUE}🔧 $(t 'switching_info') v2.3.2${NC}"
     echo ""
     echo -e "${YELLOW}$(t 'usage'):${NC} $(basename "$0") [options]"
     echo ""
@@ -1885,7 +1885,7 @@ show_help() {
     echo "  🐪 Qwen                 - qwen3-max-2026-01-23 / qwen3-coder-plus (Coding Plan)"
     echo "  🇨🇳 GLM                 - glm-5 (api.z.ai / open.bigmodel.cn)"
     echo "  🧠 Claude Sonnet 4.5    - claude-sonnet-4-5-20250929"
-  echo "  🛡️ HCNSEC               - deepseek-v4-pro (api.hcnsec.cn)"
+  echo "  🛡️ HCNSEC               - DeepSeek-V4-Pro (api.hcnsec.cn)"
 }
 
 # 将缺失的模型ID覆盖项追加到配置文件（仅追加缺失项，不覆盖已存在的配置）
@@ -2361,7 +2361,7 @@ emit_env_exports() {
             echo "export ANTHROPIC_BASE_URL='https://api.hcnsec.cn'"
             echo "if [ -f \"\$HOME/.ccm_config\" ]; then . \"\$HOME/.ccm_config\" >/dev/null 2>&1; fi"
             echo "export ANTHROPIC_AUTH_TOKEN=\"\${HCNSEC_API_KEY}\""
-            local hcnsec_model="${HCNSEC_MODEL:-deepseek-v4-pro}"
+            local hcnsec_model="${HCNSEC_MODEL:-DeepSeek-V4-Pro}"
             echo "export ANTHROPIC_MODEL='${hcnsec_model}'"
             emit_default_models "$hcnsec_model" "$hcnsec_model" "$hcnsec_model"
             emit_subagent_model "$hcnsec_model"

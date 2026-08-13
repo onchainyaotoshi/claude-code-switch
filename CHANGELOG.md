@@ -1,14 +1,19 @@
 # Changelog
 
+## [2.3.2] - 2026-08-13
+
+### Fixed
+- 🛡️ **HCNSEC model ID casing**: `emit_env_exports()` fallback used lowercase `deepseek-v4-pro`, which the HCNSEC API rejects as `model_not_found` (case-sensitive, HTTP 503). Corrected to `DeepSeek-V4-Pro` to match the config template and `get_provider_config()`. Affects users whose `HCNSEC_MODEL` is empty/placeholder. Also fixed the help-text line.
+- 📝 **CHANGELOG cleanup**: Removed the contradictory duplicate "Default model" line (lowercase) from the HCNSEC entry.
+
 ## [2.3.1] - 2026-08-13
 
 ### Added
 - ✨ **HCNSEC provider support**: Added direct provider for 幻城网安 (Xinjiang Huancheng Network Security)
   - Command: `ccm hcnsec` (also `ccm user hcnsec` and `ccm project hcnsec`)
   - Base URL: `https://api.hcnsec.cn`
-  - Default model: `deepseek-v4-pro`
-  - Auth env: `HCNSEC_API_KEY`
   - Default model: `DeepSeek-V4-Pro` (case-sensitive, verified against HCNSEC console)
+  - Auth env: `HCNSEC_API_KEY`
 - 🚀 **ccc launcher support**: Added `hcnsec` and `stepfun` to known model list so `ccc hcnsec` switches provider instead of treating it as a Claude Pro account
 - 📚 **Updated provider usage lists**: `ccm project help` and `ccm user help` now document BytePlus, Xiaomi, StepFun, and HCNSEC
 
