@@ -56,10 +56,25 @@ echo "BASE_URL=$ANTHROPIC_BASE_URL MODEL=$ANTHROPIC_MODEL"
 
 If the user can provide a real API key, also test a live request (e.g. `curl` the provider's `/v1/models` or chat endpoint) to confirm the exact model ID works.
 
+## Reinstall the updated functions
+
+Because `install.sh` injects `ccm()` and `ccc()` functions directly into shell rc files (`~/.bashrc`, `~/.zshrc`, etc.), code changes to the launcher are **not live** until the user reloads them. Offer to run this for the user, or ask them to run it:
+
+```bash
+cd /path/to/claude-code-switch
+git pull origin main
+./install.sh
+# Reload shell config, or better: open a new terminal
+source ~/.bashrc     # for bash
+source ~/.zshrc      # for zsh
+```
+
+Important: a simple `git pull` is not enough — the shell function definition must be re-injected.
+
 ## Post-change notes for the user
 
 Tell the user they must:
-1. Reinstall: `git pull`, `./install.sh`, then `source ~/.bashrc` / `source ~/.zshrc` (or start a new shell).
+1. **Reinstall and reload shell** as shown above.
 2. Manually add the new API key to `~/.ccm_config` (or delete the file and run `ccm config` to regenerate it).
 3. Use the **exact model ID** shown in the provider's dashboard; wrong casing may cause channel/model errors.
 4. `ccm update-config` only auto-adds missing model overrides, not API key placeholders.
