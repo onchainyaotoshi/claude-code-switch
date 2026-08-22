@@ -1,0 +1,65 @@
+name: Auto Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version and tag
+        id: version
+        run: |
+          # Single source of truth for the version: ccm.sh header ("# 版本: X.Y.Z").
+          # The repo's tags historically lag behind CHANGELOG versions, so an
+          # automatic semver bump from the last tag would produce wrong versions.
+          VERSION=$(grep -m1 '^# 版本:' ccm.sh | sed 's/^# 版本:[[:space:]]*//')
+          if [ -z "$VERSION" ]; then
+            echo "❌ Cannot determine version from ccm.sh header" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether tag already exists
+        id: tag
+        run: |
+          if git rev-parse -q --verify "refs/tags/${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate changelog from CHANGELOG.md
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          # Use the curated section for this version; fall back to git log when absent.
+          awk -v v="$VERSION" '
+            found == 0 && $0 ~ "^## \\[" v "\\]" {found=1; next}
+            found == 1 && /^## \[/ {exit}
+            found == 1 {print}
+          ' CHANGELOG.md > body.md
+          if [ ! -s body.md ]; then
+            LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
+            echo "## Changes since ${LAST_TAG}" > body.md
+            git log "${LAST_TAG}..HEAD" --pretty=format:"- %s" --no-merges >> body.md
+          fi
+          echo "body built: $(wc -l < body.md) lines"
+
+      - name: Create Release
+        if: steps.tag.outputs.exists != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
+          body_path: body.md
+          generate_release_notes: false
