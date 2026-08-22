@@ -192,9 +192,12 @@ ccm open qwen         # Qwen via OpenRouter
 ccm open minimax      # MiniMax via OpenRouter
 ccm open stepfun      # StepFun via OpenRouter
 ccm open sf-free      # StepFun free tier
+ccm open anthropic/claude-opus-5   # Any OpenRouter model slug
 ```
 
 **Available providers:** `claude`, `glm`, `kimi`, `deepseek`, `qwen`, `minimax`, `stepfun`
+
+**Any model slug:** `ccm open <vendor/model>` accepts any OpenRouter model ID (e.g. `anthropic/claude-opus-5`, `deepseek/deepseek-v4-pro`, `~anthropic/claude-opus-latest`) and applies it to all model slots.
 
 **Free tier:** `stepfun-free` or `sf-free` for StepFun's free model
 

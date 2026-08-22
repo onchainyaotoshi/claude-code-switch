@@ -12,13 +12,14 @@ CCM="${CCM_CMD:-$CCM_CMD_DEFAULT}"
 usage() {
     cat <<EOF
 Usage: ./ccc <model> [region|variant] [claude-options]
-       ./ccc open <provider> [claude-options]
+       ./ccc open <provider|model-id> [claude-options]
        ./ccc <account> [claude-options]        # Switch account then launch (default model)
        ./ccc <model>:<account> [claude-options]
 
 Examples:
   ./ccc deepseek                     # Launch Claude Code with DeepSeek
   ./ccc open kimi                    # Launch with OpenRouter (kimi)
+  ./ccc open anthropic/claude-opus-5 # Launch with any OpenRouter model slug
   ./ccc kimi --dangerously-skip-permissions  # Pass options to Claude Code
   ./ccc woohelps                     # Switch to 'woohelps' account and launch
   ./ccc claude:work                  # Switch to 'work' account and use Claude

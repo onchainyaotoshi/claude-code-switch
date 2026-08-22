@@ -187,7 +187,10 @@ ccm open              # 显示帮助
 ccm open glm          # 通过 OpenRouter 使用 GLM
 ccm open claude       # 通过 OpenRouter 使用 Claude
 ccm open deepseek     # 通过 OpenRouter 使用 DeepSeek
+ccm open anthropic/claude-opus-5   # 任意 OpenRouter 模型 slug
 ```
+
+**任意模型 slug:** `ccm open <vendor/model>` 支持直接传入 OpenRouter 模型 ID（如 `anthropic/claude-opus-5`、`deepseek/deepseek-v4-pro`、`~anthropic/claude-opus-latest`），会应用到所有模型插槽。
 
 ---
 

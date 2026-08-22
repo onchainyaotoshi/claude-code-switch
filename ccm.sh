@@ -5,7 +5,7 @@
 # 功能: 在不同AI模型之间快速切换
 # 支持: Claude, Deepseek, GLM4.7, KIMI2
 # 作者: Peng
-# 版本: 2.3.2
+# 版本: 2.3.3
 ############################################################
 
 # 脚本颜色定义
@@ -2020,12 +2020,16 @@ show_open_help() {
     echo -e "${YELLOW}Supported providers:${NC}"
     echo "  claude (default), deepseek, kimi, glm, qwen, minimax, stepfun"
     echo ""
+    echo -e "${YELLOW}Any OpenRouter model slug:${NC}"
+    echo "  ccm open <vendor/model>    # e.g. anthropic/claude-opus-5, ~anthropic/..-latest aliases"
+    echo ""
     echo -e "${YELLOW}Free tier:${NC}"
     echo "  stepfun-free (sf-free) - stepfun/step-3.5-flash:free"
     echo ""
     echo -e "${YELLOW}Examples:${NC}"
     echo "  eval \"\$(ccm open claude)\""
     echo "  eval \"\$(ccm open kimi)\""
+    echo "  eval \"\$(ccm open anthropic/claude-opus-5)\""
     echo "  eval \"\$(ccm open sf-free)\""
 }
 
@@ -2107,9 +2111,18 @@ emit_openrouter_exports() {
             default_haiku="$model"
             ;;
         *)
-            echo -e "${RED}❌ $(t 'unknown_option'): open $provider${NC}" >&2
-            show_open_help >&2
-            return 1
+            # Raw OpenRouter model slug (vendor/model, also ~alias): use verbatim
+            if [[ "$provider" == */* ]]; then
+                model="$provider"
+                small="$provider"
+                default_sonnet="$provider"
+                default_opus="$provider"
+                default_haiku="$provider"
+            else
+                echo -e "${RED}❌ $(t 'unknown_option'): open $provider${NC}" >&2
+                show_open_help >&2
+                return 1
+            fi
             ;;
     esac
 

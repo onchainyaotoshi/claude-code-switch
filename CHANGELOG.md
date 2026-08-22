@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.3] - 2026-08-22
+
+### Added
+- ✨ **Raw OpenRouter model slug passthrough**: `ccm open <vendor/model>` now accepts any OpenRouter model ID (e.g. `anthropic/claude-opus-5`, `deepseek/deepseek-v4-pro`, `~anthropic/claude-opus-latest`) and applies it verbatim to all model slots (`ANTHROPIC_MODEL`, `SMALL_FAST`, sonnet/opus/haiku, subagent). Previously only the hardcoded provider keywords worked; unknown args were rejected.
+- 🧪 **Test suite**: added `tests/test-open.sh` covering slug passthrough, preset regression, unknown-arg error, and `ccc` arg forwarding (isolated HOME, no harness env leakage).
+
 ## [2.3.2] - 2026-08-13
 
 ### Fixed
