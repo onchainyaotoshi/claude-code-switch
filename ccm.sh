@@ -184,6 +184,8 @@ OPENROUTER_API_KEY=your-openrouter-api-key
 
 # —— 可选：模型ID覆盖（不设置则使用下方默认）——
 DEEPSEEK_MODEL=deepseek-v4-pro
+DEEPSEEK_FLASH_MODEL=deepseek-flash
+DEEPSEEK_PRO_MODEL=deepseek-v4-pro
 KIMI_MODEL=kimi-k2.5
 KIMI_CN_MODEL=kimi-k2.5
 QWEN_MODEL=qwen3-max-2026-01-23
@@ -306,6 +308,8 @@ OPENROUTER_API_KEY=your-openrouter-api-key
 
 # —— 可选：模型ID覆盖（不设置则使用下方默认）——
 DEEPSEEK_MODEL=deepseek-v4-pro
+DEEPSEEK_FLASH_MODEL=deepseek-flash
+DEEPSEEK_PRO_MODEL=deepseek-v4-pro
 KIMI_MODEL=kimi-k2.5
 KIMI_CN_MODEL=kimi-k2.5
 QWEN_MODEL=qwen3-max-2026-01-23
@@ -381,6 +385,17 @@ emit_default_models() {
 emit_subagent_model() {
     local model="$1"
     echo "export CLAUDE_CODE_SUBAGENT_MODEL='${model}'"
+}
+
+# Resolve DeepSeek model slots. DEEPSEEK_FLASH_MODEL falls back to
+# DEEPSEEK_MODEL so existing configs keep their chosen model in the
+# "sonnet" slot; fresh configs set both explicitly.
+# Sets: CCM_DS_MAIN, CCM_DS_FLASH, CCM_DS_PRO, CCM_DS_SUBAGENT
+resolve_deepseek_models() {
+    CCM_DS_PRO="${DEEPSEEK_PRO_MODEL:-deepseek-v4-pro}"
+    CCM_DS_FLASH="${DEEPSEEK_FLASH_MODEL:-${DEEPSEEK_MODEL:-deepseek-flash}}"
+    CCM_DS_MAIN="${DEEPSEEK_MODEL:-$CCM_DS_PRO}"
+    CCM_DS_SUBAGENT="${SUBAGENT_MODEL:-$CCM_DS_FLASH}"
 }
 
 emit_default_models_from_pair() {
@@ -534,6 +549,28 @@ project_write_settings() {
 
     mkdir -p "$settings_dir"
 
+    # Model slots: DeepSeek exposes two models, so map them explicitly instead
+    # of inheriting the Claude-specific SONNET_MODEL/OPUS_MODEL/HAIKU_MODEL.
+    local sonnet_model="${SONNET_MODEL:-${config_model}}"
+    local opus_model="${OPUS_MODEL:-${config_model}}"
+    local haiku_model="${HAIKU_MODEL:-${config_model}}"
+    local subagent_model="${SUBAGENT_MODEL:-${config_model}}"
+    local model_names_json=""
+    if [[ "$provider" == "deepseek" ]]; then
+        resolve_deepseek_models
+        sonnet_model="$CCM_DS_FLASH"
+        opus_model="$CCM_DS_PRO"
+        haiku_model="$CCM_DS_FLASH"
+        subagent_model="$CCM_DS_SUBAGENT"
+        model_names_json="$(cat <<'JSON'
+,
+    "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME": "DeepSeek Flash",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME": "DeepSeek Pro",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME": "DeepSeek Flash (fast)"
+JSON
+)"
+    fi
+
     # Write project settings (simple format, no need to preserve other settings)
     cat > "$settings_path" <<EOF
 {
@@ -543,10 +580,10 @@ project_write_settings() {
   "env": {
     "ANTHROPIC_BASE_URL": "${config_base_url}",
     "ANTHROPIC_MODEL": "${config_model}",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "${SONNET_MODEL:-${config_model}}",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "${OPUS_MODEL:-${config_model}}",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "${HAIKU_MODEL:-${config_model}}",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "${SUBAGENT_MODEL:-${config_model}}"$([[ -n "$config_token" ]] && echo ",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "${sonnet_model}",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "${opus_model}",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "${haiku_model}",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "${subagent_model}"${model_names_json}$([[ -n "$config_token" ]] && echo ",
     \"ANTHROPIC_AUTH_TOKEN\": \"$config_token\"")
   }
 }
@@ -774,6 +811,32 @@ user_write_settings() {
 
     mkdir -p "$settings_dir"
 
+    # Model slots: DeepSeek exposes two models, so map them explicitly instead
+    # of inheriting the Claude-specific SONNET_MODEL/OPUS_MODEL/HAIKU_MODEL.
+    local sonnet_model="${SONNET_MODEL:-${config_model}}"
+    local opus_model="${OPUS_MODEL:-${config_model}}"
+    local haiku_model="${HAIKU_MODEL:-${config_model}}"
+    local subagent_model="${SUBAGENT_MODEL:-${config_model}}"
+    local model_names_py=""
+    local model_names_json=""
+    if [[ "$provider" == "deepseek" ]]; then
+        resolve_deepseek_models
+        sonnet_model="$CCM_DS_FLASH"
+        opus_model="$CCM_DS_PRO"
+        haiku_model="$CCM_DS_FLASH"
+        subagent_model="$CCM_DS_SUBAGENT"
+        model_names_py="existing['env']['ANTHROPIC_DEFAULT_SONNET_MODEL_NAME'] = 'DeepSeek Flash'
+existing['env']['ANTHROPIC_DEFAULT_OPUS_MODEL_NAME'] = 'DeepSeek Pro'
+existing['env']['ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME'] = 'DeepSeek Flash (fast)'"
+        model_names_json="$(cat <<'JSON'
+,
+    "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME": "DeepSeek Flash",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME": "DeepSeek Pro",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME": "DeepSeek Flash (fast)"
+JSON
+)"
+    fi
+
     # Use Python or jq to merge settings if available, otherwise use simple approach
     if command -v python3 >/dev/null 2>&1; then
         python3 << PYTHON_EOF
@@ -799,11 +862,12 @@ existing['ccmRegion'] = '$region'
 existing['env'] = {
     'ANTHROPIC_BASE_URL': '$config_base_url',
     'ANTHROPIC_MODEL': '$config_model',
-    'ANTHROPIC_DEFAULT_SONNET_MODEL': '${SONNET_MODEL:-$config_model}',
-    'ANTHROPIC_DEFAULT_OPUS_MODEL': '${OPUS_MODEL:-$config_model}',
-    'ANTHROPIC_DEFAULT_HAIKU_MODEL': '${HAIKU_MODEL:-$config_model}',
-    'CLAUDE_CODE_SUBAGENT_MODEL': '${SUBAGENT_MODEL:-$config_model}'
+    'ANTHROPIC_DEFAULT_SONNET_MODEL': '${sonnet_model}',
+    'ANTHROPIC_DEFAULT_OPUS_MODEL': '${opus_model}',
+    'ANTHROPIC_DEFAULT_HAIKU_MODEL': '${haiku_model}',
+    'CLAUDE_CODE_SUBAGENT_MODEL': '${subagent_model}'
 }
+${model_names_py}
 $(if [[ -n "$config_token" ]]; then echo "existing['env']['ANTHROPIC_AUTH_TOKEN'] = '$config_token'"; fi)
 
 with open(settings_path, 'w') as f:
@@ -821,10 +885,10 @@ PYTHON_EOF
   "env": {
     "ANTHROPIC_BASE_URL": "$config_base_url",
     "ANTHROPIC_MODEL": "$config_model",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "${SONNET_MODEL:-$config_model}",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "${OPUS_MODEL:-$config_model}",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "${HAIKU_MODEL:-$config_model}",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "${SUBAGENT_MODEL:-$config_model}"$([[ -n "$config_token" ]] && echo ",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "${sonnet_model}",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "${opus_model}",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "${haiku_model}",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "${subagent_model}"${model_names_json}$([[ -n "$config_token" ]] && echo ",
     \"ANTHROPIC_AUTH_TOKEN\": \"$config_token\"")
   }
 }
@@ -1562,6 +1626,9 @@ clean_env() {
     unset ANTHROPIC_DEFAULT_SONNET_MODEL
     unset ANTHROPIC_DEFAULT_OPUS_MODEL
     unset ANTHROPIC_DEFAULT_HAIKU_MODEL
+    unset ANTHROPIC_DEFAULT_SONNET_MODEL_NAME
+    unset ANTHROPIC_DEFAULT_OPUS_MODEL_NAME
+    unset ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME
     unset CLAUDE_CODE_SUBAGENT_MODEL
     unset API_TIMEOUT_MS
     unset CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC
@@ -1575,11 +1642,15 @@ switch_to_deepseek() {
         # 官方 Deepseek 的 Anthropic 兼容端点
         export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"
         export ANTHROPIC_AUTH_TOKEN="$DEEPSEEK_API_KEY"
-        export ANTHROPIC_MODEL="${DEEPSEEK_MODEL:-deepseek-v4-pro}"
-        export ANTHROPIC_DEFAULT_SONNET_MODEL="${SONNET_MODEL:-${DEEPSEEK_MODEL:-deepseek-v4-pro}}"
-        export ANTHROPIC_DEFAULT_OPUS_MODEL="${OPUS_MODEL:-${DEEPSEEK_MODEL:-deepseek-v4-pro}}"
-        export ANTHROPIC_DEFAULT_HAIKU_MODEL="${HAIKU_MODEL:-${DEEPSEEK_MODEL:-deepseek-v4-pro}}"
-        export CLAUDE_CODE_SUBAGENT_MODEL="${SUBAGENT_MODEL:-$ANTHROPIC_MODEL}"
+        resolve_deepseek_models
+        export ANTHROPIC_MODEL="$CCM_DS_MAIN"
+        export ANTHROPIC_DEFAULT_SONNET_MODEL="$CCM_DS_FLASH"
+        export ANTHROPIC_DEFAULT_OPUS_MODEL="$CCM_DS_PRO"
+        export ANTHROPIC_DEFAULT_HAIKU_MODEL="$CCM_DS_FLASH"
+        export ANTHROPIC_DEFAULT_SONNET_MODEL_NAME="DeepSeek Flash"
+        export ANTHROPIC_DEFAULT_OPUS_MODEL_NAME="DeepSeek Pro"
+        export ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME="DeepSeek Flash (fast)"
+        export CLAUDE_CODE_SUBAGENT_MODEL="$CCM_DS_SUBAGENT"
         echo -e "${GREEN}✅ $(t 'switched_to') Deepseek（$(t 'official')）${NC}"
     else
         echo -e "${RED}❌ Please configure DEEPSEEK_API_KEY${NC}"
@@ -1878,7 +1949,7 @@ show_help() {
     echo -e "${YELLOW}支持的模型:${NC}"
     echo "  🌙 KIMI Global          - kimi-k2.5 (api.moonshot.ai/anthropic)"
     echo "  🌕 KIMI China           - kimi-k2.5 (api.moonshot.cn/anthropic)"
-    echo "  🤖 Deepseek             - deepseek-v4-pro (api.deepseek.com/anthropic)"
+    echo "  🤖 Deepseek             - deepseek-v4-pro / deepseek-flash (api.deepseek.com/anthropic)"
     echo "  🌰 豆包 Seed-Code       - ark-code-latest (ark.cn-beijing.volces.com/api/coding)"
     echo "  ⚡ StepFun              - step-3.5-flash (api.stepfun.ai)"
     echo "  🎯 MiniMax              - MiniMax-M2.5 (api.minimax.io / api.minimaxi.com)"
@@ -1892,6 +1963,8 @@ show_help() {
 ensure_model_override_defaults() {
     local -a pairs=(
         "DEEPSEEK_MODEL=deepseek-v4-pro"
+        "DEEPSEEK_FLASH_MODEL=deepseek-flash"
+        "DEEPSEEK_PRO_MODEL=deepseek-v4-pro"
         "KIMI_MODEL=kimi-k2.5"
         "KIMI_CN_MODEL=kimi-k2.5"
         "MINIMAX_MODEL=MiniMax-M2.5"
@@ -2126,7 +2199,7 @@ emit_openrouter_exports() {
             ;;
     esac
 
-    local prelude="unset ANTHROPIC_BASE_URL ANTHROPIC_API_URL ANTHROPIC_AUTH_TOKEN ANTHROPIC_API_KEY ANTHROPIC_MODEL ANTHROPIC_SMALL_FAST_MODEL ANTHROPIC_DEFAULT_SONNET_MODEL ANTHROPIC_DEFAULT_OPUS_MODEL ANTHROPIC_DEFAULT_HAIKU_MODEL CLAUDE_CODE_SUBAGENT_MODEL API_TIMEOUT_MS CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC"
+    local prelude="unset ANTHROPIC_BASE_URL ANTHROPIC_API_URL ANTHROPIC_AUTH_TOKEN ANTHROPIC_API_KEY ANTHROPIC_MODEL ANTHROPIC_SMALL_FAST_MODEL ANTHROPIC_DEFAULT_SONNET_MODEL ANTHROPIC_DEFAULT_OPUS_MODEL ANTHROPIC_DEFAULT_HAIKU_MODEL ANTHROPIC_DEFAULT_SONNET_MODEL_NAME ANTHROPIC_DEFAULT_OPUS_MODEL_NAME ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME CLAUDE_CODE_SUBAGENT_MODEL API_TIMEOUT_MS CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC"
     echo "$prelude"
     echo "export ANTHROPIC_BASE_URL='https://openrouter.ai/api'"
     echo "export ANTHROPIC_API_URL='https://openrouter.ai/api'"
@@ -2146,7 +2219,7 @@ emit_env_exports() {
     load_config || return 1
 
     # 通用前导：清理旧变量
-    local prelude="unset ANTHROPIC_BASE_URL ANTHROPIC_API_URL ANTHROPIC_AUTH_TOKEN ANTHROPIC_API_KEY ANTHROPIC_MODEL ANTHROPIC_SMALL_FAST_MODEL ANTHROPIC_DEFAULT_SONNET_MODEL ANTHROPIC_DEFAULT_OPUS_MODEL ANTHROPIC_DEFAULT_HAIKU_MODEL CLAUDE_CODE_SUBAGENT_MODEL API_TIMEOUT_MS CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC"
+    local prelude="unset ANTHROPIC_BASE_URL ANTHROPIC_API_URL ANTHROPIC_AUTH_TOKEN ANTHROPIC_API_KEY ANTHROPIC_MODEL ANTHROPIC_SMALL_FAST_MODEL ANTHROPIC_DEFAULT_SONNET_MODEL ANTHROPIC_DEFAULT_OPUS_MODEL ANTHROPIC_DEFAULT_HAIKU_MODEL ANTHROPIC_DEFAULT_SONNET_MODEL_NAME ANTHROPIC_DEFAULT_OPUS_MODEL_NAME ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME CLAUDE_CODE_SUBAGENT_MODEL API_TIMEOUT_MS CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC"
 
     case "$target" in
         "open")
@@ -2154,14 +2227,17 @@ emit_env_exports() {
             ;;
         "deepseek"|"ds")
             if is_effectively_set "$DEEPSEEK_API_KEY"; then
+                resolve_deepseek_models
                 echo "$prelude"
                 echo "export ANTHROPIC_BASE_URL='https://api.deepseek.com/anthropic'"
                 echo "if [ -f \"\$HOME/.ccm_config\" ]; then . \"\$HOME/.ccm_config\" >/dev/null 2>&1; fi"
                 echo "export ANTHROPIC_AUTH_TOKEN=\"\${DEEPSEEK_API_KEY}\""
-                local ds_model="${DEEPSEEK_MODEL:-deepseek-v4-pro}"
-                echo "export ANTHROPIC_MODEL='${ds_model}'"
-                emit_default_models "${SONNET_MODEL:-$ds_model}" "${OPUS_MODEL:-$ds_model}" "${HAIKU_MODEL:-$ds_model}"
-                emit_subagent_model "${SUBAGENT_MODEL:-$ds_model}"
+                echo "export ANTHROPIC_MODEL='${CCM_DS_MAIN}'"
+                emit_default_models "$CCM_DS_FLASH" "$CCM_DS_PRO" "$CCM_DS_FLASH"
+                echo "export ANTHROPIC_DEFAULT_SONNET_MODEL_NAME='DeepSeek Flash'"
+                echo "export ANTHROPIC_DEFAULT_OPUS_MODEL_NAME='DeepSeek Pro'"
+                echo "export ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME='DeepSeek Flash (fast)'"
+                emit_subagent_model "$CCM_DS_SUBAGENT"
             else
                 echo -e "${RED}❌ Please configure DEEPSEEK_API_KEY${NC}" >&2
                 return 1
