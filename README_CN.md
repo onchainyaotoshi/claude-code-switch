@@ -172,6 +172,13 @@ ccc                    # 显示 ccc 用法（无参数）
 >
 > **豆包 Coding Plan**：[volcengine.com](https://volcengine.com/L/rLv5d5OWXgg/)（邀请码：`ZP5PZMEY`）
 
+### 同一会话使用 DeepSeek Flash + Pro
+`ccm deepseek` 把两个 DeepSeek 模型映射到 Claude Code 的模型别名：
+- `sonnet` → `DEEPSEEK_FLASH_MODEL`（默认 `deepseek-flash`）
+- `opus` → `DEEPSEEK_PRO_MODEL`（默认 `deepseek-v4-pro`）
+
+无需重启即可切换：`/model sonnet`（Flash）、`/model opus`（Pro），或在 `/model` 中选择 **DeepSeek Flash** / **DeepSeek Pro**。
+
 ### Seed 变体
 ```bash
 ccm seed              # ark-code-latest（默认）
@@ -287,7 +294,9 @@ OPENROUTER_API_KEY=...
 CLAUDE_API_KEY=...
 
 # 模型 ID 覆盖（可选）
-DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_MODEL=deepseek-v4-pro
+DEEPSEEK_FLASH_MODEL=deepseek-flash
+DEEPSEEK_PRO_MODEL=deepseek-v4-pro
 KIMI_MODEL=kimi-k2.5
 KIMI_CN_MODEL=kimi-k2.5
 QWEN_MODEL=qwen3-max-2026-01-23

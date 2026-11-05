@@ -172,6 +172,13 @@ ccc                    # Show ccc usage (no args)
 >
 > **Doubao Coding Plan**: [volcengine.com](https://volcengine.com/L/rLv5d5OWXgg/) (Invite code: `ZP5PZMEY`)
 
+### DeepSeek Flash + Pro in one session
+`ccm deepseek` maps two DeepSeek models onto Claude Code's model aliases:
+- `sonnet` → `DEEPSEEK_FLASH_MODEL` (default `deepseek-flash`)
+- `opus` → `DEEPSEEK_PRO_MODEL` (default `deepseek-v4-pro`)
+
+Switch without restarting: `/model sonnet` (flash), `/model opus` (pro), or open `/model` and pick **DeepSeek Flash** / **DeepSeek Pro**.
+
 ### Seed Variants
 ```bash
 ccm seed              # ark-code-latest (default)
@@ -296,7 +303,9 @@ OPENROUTER_API_KEY=...
 CLAUDE_API_KEY=...
 
 # Model ID Overrides (optional)
-DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_MODEL=deepseek-v4-pro
+DEEPSEEK_FLASH_MODEL=deepseek-flash
+DEEPSEEK_PRO_MODEL=deepseek-v4-pro
 KIMI_MODEL=kimi-k2.5
 KIMI_CN_MODEL=kimi-k2.5
 QWEN_MODEL=qwen3-max-2026-01-23

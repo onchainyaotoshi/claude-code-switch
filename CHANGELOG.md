@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- ✨ **DeepSeek Flash + Pro in one session**: `ccm deepseek` now maps `DEEPSEEK_FLASH_MODEL` (default `deepseek-flash`) to the Sonnet/Haiku slots and `DEEPSEEK_PRO_MODEL` (default `deepseek-v4-pro`) to the Opus slot, with display names. `/model` now shows **DeepSeek Flash** / **DeepSeek Pro**, and `/model sonnet` / `/model opus` switch mid-session without restarting. `DEEPSEEK_MODEL` remains the default model; existing configs that only set it keep using it for the flash slot.
+- 🧪 **Tests**: `tests/test-deepseek.sh` covers alias mapping, project/user settings output, and confirms generic Claude `OPUS_MODEL` / `HAIKU_MODEL` no longer leak into DeepSeek.
+
+### Fixed
+- 🐛 **DeepSeek `OPUS_MODEL` / `HAIKU_MODEL` collision**: the DeepSeek branch inherited the Claude-specific overrides from `~/.ccm_config`, so `/model` sent `claude-opus-4-6` / `claude-haiku-4-5-*` to `api.deepseek.com` and failed to switch. DeepSeek now resolves its own flash/pro slots.
+
 ## [2.3.3] - 2026-08-22
 
 ### Added
